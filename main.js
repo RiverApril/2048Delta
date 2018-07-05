@@ -84,48 +84,18 @@ let init = function(){
         touchDownY = e.touches[0].clientY;
     }, false);
 
-    document.addEventListener('touchmove', function(e){
+    document.addEventListener('touchend', function(e){
         if(!touchDownX || !touchDownY){
             return;
         }
 
-        let touchUpX = e.touches[0].clientX;
-        let touchUpY = e.touches[0].clientY;
+        let touchUpX = e.changedTouches[0].clientX;
+        let touchUpY = e.changedTouches[0].clientY;
 
         let dx = touchUpX - touchDownX;
         let dy = touchUpY - touchDownY;
 
-        let horizDot = dx*vecRightX + dy*vecRightY;
-        let forwardDot = dx*vecForwardSlashDownX + dy*vecForwardSlashDownY;
-        let backwardDot = dx*vecBackwardSlashDownX + dy*vecBackwardSlashDownY;
-
-        let moved = false;
-
-        if(Math.abs(horizDot) > Math.abs(forwardDot) && Math.abs(horizDot) > Math.abs(backwardDot)){
-            if(horizDot > 0){
-                moved = shiftHoriz(true);
-            }else{
-                moved = shiftHoriz(false);
-            }
-        }else if(Math.abs(forwardDot) > Math.abs(horizDot) && Math.abs(forwardDot) > Math.abs(backwardDot)){
-            if(forwardDot > 0){
-                moved = shiftForwardSlash(true);
-            }else{
-                moved = shiftForwardSlash(false);
-            }
-        }else if(Math.abs(backwardDot) > Math.abs(horizDot) && Math.abs(backwardDot) > Math.abs(forwardDot)){
-            if(backwardDot > 0){
-                moved = shiftBackwardSlash(true);
-            }else{
-                moved = shiftBackwardSlash(false);
-            }
-        }
-
-        if(moved){
-            cleanRecentMerges();
-            addNewRandomTile();
-            checkLoss();
-        }
+        swipeInput(dx, dy);
 
         touchDownX = null;
         touchDownY = null;
@@ -159,6 +129,70 @@ let init = function(){
 
     
 
+}
+
+let swipeInput = function(dx, dy){
+
+        let dl = Math.sqrt(dx*dx + dy*dy);
+
+        if(dl < 50){
+            return;
+        }
+
+        dx /= dl;
+        dy /= dl;
+
+        let horizDot = dx*vecRightX + dy*vecRightY;
+        let forwardDot = dx*vecForwardSlashDownX + dy*vecForwardSlashDownY;
+        let backwardDot = dx*vecBackwardSlashDownX + dy*vecBackwardSlashDownY;
+
+        let moved = false;
+
+        let swipeTooClose = 0.2;
+
+        if(Math.abs(horizDot) > Math.abs(forwardDot) && Math.abs(horizDot) > Math.abs(backwardDot)){
+            if(Math.abs(Math.abs(horizDot) - Math.abs(forwardDot)) < swipeTooClose){
+                return;
+            }
+            if(Math.abs(Math.abs(horizDot) - Math.abs(backwardDot)) < swipeTooClose){
+                return;
+            }
+            if(horizDot > 0){
+                moved = shiftHoriz(true);
+            }else{
+                moved = shiftHoriz(false);
+            }
+        }else if(Math.abs(forwardDot) > Math.abs(horizDot) && Math.abs(forwardDot) > Math.abs(backwardDot)){
+            if(Math.abs(Math.abs(horizDot) - Math.abs(forwardDot)) < swipeTooClose){
+                return;
+            }
+            if(Math.abs(Math.abs(forwardDot) - Math.abs(backwardDot)) < swipeTooClose){
+                return;
+            }
+            if(forwardDot > 0){
+                moved = shiftForwardSlash(true);
+            }else{
+                moved = shiftForwardSlash(false);
+            }
+        }else if(Math.abs(backwardDot) > Math.abs(horizDot) && Math.abs(backwardDot) > Math.abs(forwardDot)){
+            if(Math.abs(Math.abs(horizDot) - Math.abs(backwardDot)) < swipeTooClose){
+                return;
+            }
+            if(Math.abs(Math.abs(forwardDot) - Math.abs(backwardDot)) < swipeTooClose){
+                return;
+            }
+            if(backwardDot > 0){
+                moved = shiftBackwardSlash(true);
+            }else{
+                moved = shiftBackwardSlash(false);
+            }
+        }
+
+        if(moved){
+            cleanRecentMerges();
+            addNewRandomTile();
+            checkLoss();
+        }
 }
 
 let isInBounds = function(row, col){
