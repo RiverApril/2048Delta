@@ -26,6 +26,11 @@ let msgLeft;
 let msgRight;
 let tryAgainButton;
 
+let lastState;
+let beforeMoveState;
+
+let showUndoButtonTimeout;
+
 
 let init = function(){
     //console.log("init");
@@ -59,6 +64,7 @@ let init = function(){
 
     document.body.onkeydown = function(e){
         let moved = false;
+        beforeMoveState = saveState();
         if(e.keyCode == 'Q'.charCodeAt(0)){
             moved = shiftBackwardSlash(false);
         }else if(e.keyCode == 'W'.charCodeAt(0)){
@@ -73,9 +79,7 @@ let init = function(){
             moved = shiftBackwardSlash(true);
         }
         if(moved){
-            cleanRecentMerges();
-            addNewRandomTile();
-            checkLoss();
+            justMoved();
         }
     };
 
@@ -84,23 +88,61 @@ let init = function(){
         touchDownY = e.touches[0].clientY;
     }, false);
 
-    document.addEventListener('touchend', function(e){
+    document.addEventListener('touchmove', function(e){
         if(!touchDownX || !touchDownY){
             return;
         }
 
-        let touchUpX = e.changedTouches[0].clientX;
-        let touchUpY = e.changedTouches[0].clientY;
+        let touchUpX = e.touches[0].clientX;
+        let touchUpY = e.touches[0].clientY;
 
         let dx = touchUpX - touchDownX;
         let dy = touchUpY - touchDownY;
 
-        swipeInput(dx, dy);
-
-        touchDownX = null;
-        touchDownY = null;
+        if(Math.abs(dx) > 10 || Math.abs(dy) > 10){
+            swipeInput(dx, dy);
+    
+            touchDownX = null;
+            touchDownY = null;
+        }
 
     }, false);
+
+    document.addEventListener('touchend', function(e){
+        touchDownX = null;
+        touchDownY = null;
+    } ,false);
+
+
+    document.addEventListener('mousedown', function(e){
+        touchDownX = e.clientX;
+        touchDownY = e.clientY;
+    }, false);
+
+    document.addEventListener('mousemove', function(e){
+        if(!touchDownX || !touchDownY){
+            return;
+        }
+
+        let touchUpX = e.clientX;
+        let touchUpY = e.clientY;
+
+        let dx = touchUpX - touchDownX;
+        let dy = touchUpY - touchDownY;
+
+        if(Math.abs(dx) > 10 || Math.abs(dy) > 10){
+            swipeInput(dx, dy);
+    
+            touchDownX = null;
+            touchDownY = null;
+        }
+
+    }, false);
+
+    document.addEventListener('mouseup', function(e){
+        touchDownX = null;
+        touchDownY = null;
+    } ,false);
 
     addNewRandomTile();
     addNewRandomTile();
@@ -132,12 +174,9 @@ let init = function(){
 }
 
 let swipeInput = function(dx, dy){
+        beforeMoveState = saveState();
 
         let dl = Math.sqrt(dx*dx + dy*dy);
-
-        if(dl < 50){
-            return;
-        }
 
         dx /= dl;
         dy /= dl;
@@ -148,7 +187,7 @@ let swipeInput = function(dx, dy){
 
         let moved = false;
 
-        let swipeTooClose = 0.2;
+        let swipeTooClose = 0.1;
 
         if(Math.abs(horizDot) > Math.abs(forwardDot) && Math.abs(horizDot) > Math.abs(backwardDot)){
             if(Math.abs(Math.abs(horizDot) - Math.abs(forwardDot)) < swipeTooClose){
@@ -189,10 +228,86 @@ let swipeInput = function(dx, dy){
         }
 
         if(moved){
-            cleanRecentMerges();
-            addNewRandomTile();
-            checkLoss();
+            justMoved();
         }
+}
+
+let hudeUndoButton = function(){
+    document.getElementsByClassName("undoButton")[0].style.opacity = "0";
+    document.getElementsByClassName("undoButton")[0].disabled = true;
+}
+
+let showUndoButton = function(){
+    document.getElementsByClassName("undoButton")[0].style.opacity = "1";
+    document.getElementsByClassName("undoButton")[0].disabled = false;
+}
+
+let justMoved = function(){
+    cleanRecentMerges();
+    addNewRandomTile();
+    checkLoss();
+    lastState = beforeMoveState;
+
+    hudeUndoButton();
+    if(showUndoButtonTimeout){
+        clearTimeout(showUndoButtonTimeout);
+    }
+    showUndoButtonTimeout = setTimeout(function(){
+        showUndoButton();
+    }, 3000);
+}
+
+let saveState = function(){
+    let state = {tiles:[]};
+    for(let row = 0; row < rowQty; row++){
+        state.tiles.push([]);
+        for(let col = 0; col <= row*2; col++){
+            if(tileElements[row][col] == null){
+                state.tiles[row].push(null);
+            }else{
+                state.tiles[row].push(parseInt(tileElements[row][col].getAttribute("tilenum")));
+            }
+        }
+    }
+    return state;
+}
+
+let undo = function(){
+    if(isLossState()){
+        resetGameEmpty();
+    }
+    if(lastState){
+        let temp = saveState();
+        loadState(lastState);
+        lastState = temp;
+    }
+}
+
+let loadState = function(state){
+
+    for(let row = 0; row < rowQty; row++){
+        for(let col = 0; col <= row*2; col++){
+            if(tileElements[row][col] != null){
+                let prev = tileElements[row][col];
+                prev.style.opacity = 0;
+                setTimeout(function(){
+                    try{
+                        tileContainer.removeChild(prev);
+                    }catch(e){};
+                }, 500);
+
+                tileElements[row][col] = null;
+            }
+        }
+    }
+
+    for(let row = 0; row < rowQty; row++){
+        for(let col = 0; col <= row*2; col++){
+            if(state.tiles[row][col] != null){
+                addTile(row, col, state.tiles[row][col]);
+            }
+        }
+    }
 }
 
 let isInBounds = function(row, col){
@@ -237,7 +352,7 @@ let isLossState = function(){
     return true;
 }
 
-let resetGame = function(){
+let resetGameEmpty = function(){
     msgLeft.style.animationName = "";
     msgRight.style.animationName = "";
     tryAgainButton.style.opacity = 0;
@@ -275,9 +390,13 @@ let resetGame = function(){
         }
     }
 
-    addNewRandomTile();
-    addNewRandomTile();
+}
 
+let resetGame = function(){
+    resetGameEmpty();
+
+    addNewRandomTile();
+    addNewRandomTile();
 }
 
 let checkLoss = function(){
