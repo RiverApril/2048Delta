@@ -108,18 +108,6 @@ button.tryAgain {
     }
 }
 
-.gridContainer {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-}
-
-.tileContainer {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-}
-
 .gridPiece {
     width: 0;
     height: 0;
@@ -208,14 +196,6 @@ span {
     transform: scale(1.72711571675302, 1) rotate(-60deg) translate(-63px, 11px);
 }
 
-.tilenumA6 {
-    transform: scale(1.72711571675302, 1) translate(-28px, 48px);
-}
-
-.tilenumV6 {
-    transform: scale(1.72711571675302, 1) rotate(-60deg) translate(-63px, 11px);
-}
-
 [tilenum="2"] {
     font-size: 48px;
     border-bottom-color: #fcf7f4;
@@ -282,9 +262,4 @@ span {
     font-size: 20px;
     color: white;
     border-bottom-color: #7210ce;
-}
-[tilenum="131072"] {
-    font-size: 16px;
-    color: white;
-    border-bottom-color: #000000;
 }

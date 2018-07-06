@@ -37,7 +37,7 @@ let init = function(){
 
     rowQty = 0;
 
-    gridContainer = document.getElementsByClassName("gridContainer")[0];
+    gridContainer = document.getElementsByClassName("gameContainer")[0];
     tileContainer = document.getElementsByClassName("tileContainer")[0];
     let rows = gridContainer.children;
     for(let y = 0; y < rows.length; y++){
