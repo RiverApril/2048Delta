@@ -393,6 +393,8 @@ let resetGameEmpty = function(){
 }
 
 let resetGame = function(){
+    hudeUndoButton();
+    clearTimeout(showUndoButtonTimeout);
     resetGameEmpty();
 
     addNewRandomTile();
