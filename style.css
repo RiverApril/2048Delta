@@ -119,6 +119,85 @@ button.tryAgain {
     display: inline-block;
 }
 
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.introMsg {
+    position: absolute;
+    left: 170;
+    top: 415px;
+
+    font-size: 32px;
+    color: #fcf7f4;
+
+    font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+
+    display: inline-block;
+    vertical-align: middle;
+    line-height: normal;
+    font-weight: bold;
+    text-align: center;
+}
+
+.introArrowL {
+    left: 80px;
+    top: 60px;
+    transform: rotate(30deg);
+}
+
+.introArrowR {
+    left: 345px;
+    top: 60px;
+    transform: rotate(-30deg);
+}
+
+.introArrowB {
+    left: 212px;
+    top: 290px;
+    transform: rotate(90deg);
+}
+
+.introArrow {
+    width: 10px;
+    height: 240px;
+    position: absolute;
+    background-color: #fcf7f4;
+
+    animation-duration: 1s;
+    animation-iteration-count: 1;
+    animation-delay: 0s;
+    animation-timing-function: ease-out;
+}
+
+.introArrow:before {
+    content: "";
+    position: absolute;
+    top: -18px;
+    left: -15px;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent; 
+    border-bottom: 20px solid #fcf7f4;
+}
+
+.introArrow:after {
+    content: "";
+    position: absolute;
+    bottom: -18px;
+    left: -15px;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent; 
+    border-top: 20px solid #fcf7f4;
+}
+
 .gridA {
     transform: scale(0.579, 1);
 }

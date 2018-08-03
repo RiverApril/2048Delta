@@ -25,11 +25,14 @@ let vecBackwardSlashDownY = Math.sqrt(3)/2;
 let msgLeft;
 let msgRight;
 let tryAgainButton;
+let introDivs;
 
 let lastState;
 let beforeMoveState;
 
 let showUndoButtonTimeout;
+
+let noSwipesYet = false;
 
 
 let init = function(){
@@ -147,6 +150,8 @@ let init = function(){
     addNewRandomTile();
     addNewRandomTile();
 
+    noSwipesYet = true;
+
 
     /*let openTiles = findAllOpenTiles();
     let x = 2;
@@ -247,6 +252,21 @@ let justMoved = function(){
     addNewRandomTile();
     checkLoss();
     lastState = beforeMoveState;
+
+    if(noSwipesYet){
+        noSwipesYet = false;
+        introDivs = document.getElementsByClassName("introDivs");
+        for(let i = 0; i < introDivs.length; i++){
+            introDivs[i].style.animationName = "fadeOut";
+            introDivs[i].style.animationTimingFunction = "ease-out";
+            introDivs[i].style.animationDuration = "1s";
+        }
+        setTimeout(function(){
+            while(introDivs.length > 0){
+                gridContainer.removeChild(introDivs[0]);
+            }
+        }, 800);
+    }
 
     hudeUndoButton();
     if(showUndoButtonTimeout){
