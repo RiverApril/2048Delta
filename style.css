@@ -12,6 +12,11 @@ body {
     user-select: none;
 }
 
+p {
+    font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+    font-weight: bold;
+}
+
 button {
     font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
     font-weight: bold;
@@ -19,6 +24,18 @@ button {
 }
 
 button.undoButton {
+    font-size: 16px;
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-bottom: -40px;
+    background-color: transparent;
+    opacity: 0;
+    transition-duration: 1s;
+}
+
+button.newGameButton {
+    position: absolute;
+    left: 400px;
     font-size: 16px;
     margin-top: 20px;
     margin-left: 20px;

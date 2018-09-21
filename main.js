@@ -147,10 +147,21 @@ let init = function(){
         touchDownY = null;
     } ,false);
 
-    addNewRandomTile();
-    addNewRandomTile();
 
-    noSwipesYet = true;
+    let oldGameState = getSaveCookie();
+
+    if(oldGameState){
+        loadState(oldGameState);
+
+        showNewGameButton();
+        
+        noSwipesYet = true;
+    }else{
+        addNewRandomTile();
+        addNewRandomTile();
+
+        noSwipesYet = true;
+    }
 
 
     /*let openTiles = findAllOpenTiles();
@@ -176,6 +187,31 @@ let init = function(){
 
     
 
+}
+
+let newGame = function(){
+    clearAllTiles();
+
+    addNewRandomTile();
+    addNewRandomTile();
+}
+
+let getSaveCookie = function(){
+    var data = document.cookie.match(new RegExp("2048DeltaSave=([^;]+)"));
+    if(data){
+        try{
+            data = JSON.parse(data[1]);
+        }catch(e){
+            return null;
+        }
+    }
+    return data;
+}
+
+let setSaveCookie = function(data){
+    var cookie = "2048DeltaSave="+JSON.stringify(data)+"; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+    document.cookie = cookie;
+    console.log(cookie);
 }
 
 let swipeInput = function(dx, dy){
@@ -247,11 +283,27 @@ let showUndoButton = function(){
     document.getElementsByClassName("undoButton")[0].disabled = false;
 }
 
+let hideNewGameButton = function(){
+    document.getElementsByClassName("newGameButton")[0].style.opacity = "0";
+    document.getElementsByClassName("newGameButton")[0].disabled = true;
+}
+
+let showNewGameButton = function(){
+    document.getElementsByClassName("newGameButton")[0].style.opacity = "1";
+    document.getElementsByClassName("newGameButton")[0].disabled = false;
+}
+
 let justMoved = function(){
     cleanRecentMerges();
     addNewRandomTile();
     checkLoss();
     lastState = beforeMoveState;
+    if(!isLossState()){
+        setSaveCookie(saveState());
+    }else{
+        setSaveCookie("");
+    }
+    hideNewGameButton();
 
     if(noSwipesYet){
         noSwipesYet = false;
@@ -301,9 +353,14 @@ let undo = function(){
         loadState(lastState);
         lastState = temp;
     }
+    if(!isLossState()){
+        setSaveCookie(saveState());
+    }else{
+        setSaveCookie("");
+    }
 }
 
-let loadState = function(state){
+let clearAllTiles = function(){
 
     for(let row = 0; row < rowQty; row++){
         for(let col = 0; col <= row*2; col++){
@@ -320,6 +377,12 @@ let loadState = function(state){
             }
         }
     }
+
+}
+
+let loadState = function(state){
+
+    clearAllTiles();
 
     for(let row = 0; row < rowQty; row++){
         for(let col = 0; col <= row*2; col++){
